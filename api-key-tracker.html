@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Key Usage Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #4caf50;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .usage-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .console-log {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 API Key Usage Tracker</h1>
+        <p>This demo shows a cookie-based API key usage tracking system with a rolling 7-day limit.</p>
+        
+        <div class="usage-info">
+            <h3>Current Status:</h3>
+            <div id="statusDisplay"></div>
+        </div>
+        
+        <div>
+            <button id="useApiBtn" onclick="useApiKey()">Use API Key</button>
+            <button onclick="checkStatus()">Check Status</button>
+            <button onclick="resetCookies()">Reset All Cookies</button>
+            <button onclick="showCookies()">Show All Cookies</button>
+        </div>
+        
+        <div class="console-log" id="consoleLog"></div>
+    </div>
+
+    <script src="visitor-tracker.js"></script>
+    <script>
+        let visitorTracker;
+
+        // Logging function
+        function log(message) {
+            console.log(message);
+            const logElement = document.getElementById('consoleLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Use the API key
+        async function useApiKey() {
+            try {
+                const result = await visitorTracker.recordUsage();
+                log(`✅ API key used successfully! Usage recorded`);
+                log(`Remaining uses: ${result.remainingRuns}`);
+                
+                // Simulate API call
+                simulateApiCall();
+                updateStatusDisplay();
+                return true;
+            } catch (error) {
+                alert(error.message);
+                log("❌ API usage blocked - " + error.message);
+                updateStatusDisplay();
+                return false;
+            }
+        }
+
+        // Simulate an API call
+        function simulateApiCall() {
+            log("🚀 Simulating API call...");
+            setTimeout(() => {
+                log("📡 API call completed successfully!");
+            }, 1000);
+        }
+
+        // Check current status
+        async function checkStatus() {
+            log("📊 Checking current status...");
+            updateStatusDisplay();
+        }
+
+        // Update the status display
+        function updateStatusDisplay() {
+            const stats = visitorTracker.getVisitorStats();
+            const statusDiv = document.getElementById('statusDisplay');
+            const useBtn = document.getElementById('useApiBtn');
+            
+            let statusClass = 'status';
+            let statusText = '';
+            
+            if (!stats.canUse) {
+                statusClass += ' error';
+                statusText = `❌ Usage limit reached (${stats.currentWeekRuns}/${stats.maxWeeklyRuns} uses this week)`;
+                useBtn.disabled = true;
+            } else if (stats.remainingRuns === 1) {
+                statusClass += ' warning';
+                statusText = `⚠️ ${stats.remainingRuns} use remaining (${stats.currentWeekRuns}/${stats.maxWeeklyRuns} uses this week)`;
+                useBtn.disabled = false;
+            } else {
+                statusText = `✅ ${stats.remainingRuns} uses remaining (${stats.currentWeekRuns}/${stats.maxWeeklyRuns} uses this week)`;
+                useBtn.disabled = false;
+            }
+            
+            // Show usage history
+            if (stats.recentUsage.length > 0) {
+                statusText += '<br><br><strong>Recent usage:</strong><br>';
+                stats.recentUsage.forEach((usage, index) => {
+                    const date = new Date(usage.timestamp);
+                    const timeAgo = getTimeAgo(date);
+                    statusText += `${index + 1}. ${date.toLocaleString()} (${timeAgo})<br>`;
+                });
+            }
+            
+            statusDiv.innerHTML = statusText;
+            statusDiv.className = statusClass;
+        }
+
+        // Get human-readable time ago
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffMinutes = Math.floor(diffMs / (1000 * 60));
+            
+            if (diffDays > 0) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+            if (diffHours > 0) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            if (diffMinutes > 0) return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+            return 'Just now';
+        }
+
+        // Reset all cookies (for testing)
+        async function resetCookies() {
+            await visitorTracker.resetVisitorData();
+            log("🔄 All visitor data reset");
+            updateStatusDisplay();
+        }
+
+        // Show all cookies
+        function showCookies() {
+            log("🍪 All cookies:");
+            const stats = visitorTracker.getVisitorStats();
+            log(`Visitor ID: ${stats.visitorId}`);
+            log(`Total Runs: ${stats.totalRuns}`);
+            log(`Current Week Runs: ${stats.currentWeekRuns}`);
+            log(`Remaining Runs: ${stats.remainingRuns}`);
+            log(`First Visit: ${new Date(stats.firstVisit).toLocaleString()}`);
+            log(`Last Visit: ${new Date(stats.lastVisit).toLocaleString()}`);
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', async function() {
+            log("🌟 API Key Tracker initializing...");
+            visitorTracker = new VisitorTracker();
+            await visitorTracker.init();
+            updateStatusDisplay();
+            
+            // Auto-check status every 30 seconds
+            setInterval(() => {
+                updateStatusDisplay();
+            }, 30000);
+        });
+    </script>
+</body>
+</html>

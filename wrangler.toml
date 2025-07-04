@@ -1,0 +1,17 @@
+# Cloudflare Pages configuration for Roamiee Travel Planner
+name = "roamiee"
+compatibility_date = "2023-05-18"
+pages_build_output_dir = "./dist"
+
+# Routes configuration is handled by _routes.json for Cloudflare Pages
+# No routes config needed here
+
+# KV namespace binding
+[[kv_namespaces]]
+binding = "TRAVEL_DATA"
+id = "bb5579ad949e415ea2f9be2aa70d56e7"
+preview_id = "bb5579ad949e415ea2f9be2aa70d56e7"
+
+# Environment variables
+[vars]
+OPENAI_MODEL = "gpt-3.5-turbo"

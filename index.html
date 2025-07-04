@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roamii</title>
+    <link rel="icon" type="image/x-icon" href="images/logo.ico">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="author-badge">
+        <span>👨‍💻<strong> Author:</strong> Ali A</span>
+        
+    </div>
+    <div class="container">
+        <header>
+            <h1><img src="images/logo.png" alt="Roamii Logo" class="roamii-logo"> Roamii</h1>
+            <p>Plan your work and holiday road trips with AI</p>
+        </header>
+
+        <div class="input-section">
+            <div class="section-header">
+                <h2>Trip Details</h2>
+                <div class="usage-counter">
+                    <span id="counterText">Used <span id="usageCount">0</span> times today</span>
+                </div>
+            </div>
+            <form id="travelForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="currentLocation">Starting Location:</label>
+                        <input type="text" id="currentLocation" required placeholder="e.g., New York, NY">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="destination">Destination:</label>
+                        <input type="text" id="destination" required placeholder="e.g., Miami, FL">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adults">Adults:</label>
+                        <input type="number" id="adults" min="1" value="2" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="children">Children:</label>
+                        <input type="number" id="children" min="0" value="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hotelType">Hotel Type:</label>
+                        <select id="hotelType" required>
+                            <option value="budget">Budget</option>
+                            <option value="mid-range">Mid-range</option>
+                            <option value="luxury">Luxury</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hotelBrand">Preferred Hotel Brand:</label>
+                        <input type="text" id="hotelBrand" placeholder="e.g., Holiday Inn Express, Marriott">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dietType">Dietary Preference:</label>
+                        <select id="dietType">
+                            <option value="none">No preference</option>
+                            <option value="halal">Halal</option>
+                            <option value="kosher">Kosher</option>
+                            <option value="vegetarian">Vegetarian</option>
+                            <option value="vegan">Vegan</option>
+                            <option value="gluten-free">Gluten-free</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fuelEfficiency">Fuel Efficiency (MPG):</label>
+                        <input type="number" id="fuelEfficiency" step="0.1" value="25" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gasPrice">Gas Price per Gallon ($):</label>
+                        <input type="number" id="gasPrice" step="0.01" value="3.50" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="days">Trip Duration (days):</label>
+                        <input type="number" id="days" min="1" value="3" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="startDate">Start Date:</label>
+                        <input type="date" id="startDate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="budget">Total Budget ($):</label>
+                        <input type="number" id="budget" min="0" step="0.01" value="1000" required>
+                    </div>
+                </div>
+                
+                <div class="api-key-section">
+                    <h3>API Key Selection</h3>
+                    <div class="api-key-options">
+                        <div class="api-option">
+                            <input type="radio" id="defaultKey" name="apiKeyOption" value="default" checked>
+                            <label for="defaultKey">
+                                <span class="option-title">Use Default API Key</span>
+                                <span class="option-description">Limited to 2 uses per week</span>
+                                <span class="usage-status" id="defaultKeyStatus">Available uses: <span id="remainingUses">2</span>/2</span>
+                            </label>
+                        </div>
+                        
+                        <div class="api-option">
+                            <input type="radio" id="customKey" name="apiKeyOption" value="custom">
+                            <label for="customKey">
+                                <span class="option-title">Use Your Own API Key</span>
+                                <span class="option-description">Unlimited usage with your OpenAI API key</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="custom-key-input" id="customKeyInput" style="display: none;">
+                        <label for="userApiKey">Enter your OpenAI API Key:</label>
+                        <input type="password" id="userApiKey" placeholder="sk-..." autocomplete="off">
+                        <small class="key-notice">🔒 Your API key is stored locally on your device and persists across browser sessions. It is never shared with other users.</small>
+                    </div>
+                </div>
+                
+                <button type="submit" id="planTripBtn">🚀 Plan My Trip</button>
+            </form>
+        </div>
+
+        <div class="terminal-section">
+            <div class="terminal-header">
+                <div class="terminal-controls">
+                    <span class="control close"></span>
+                    <span class="control minimize"></span>
+                    <span class="control maximize"></span>
+                </div>
+                <span class="terminal-title">AI Travel Planner Terminal</span>
+            </div>
+            <div class="terminal-body" id="terminal">
+                <div class="terminal-line">
+                    <span class="prompt">travel-planner@ai:~$</span>
+                    <span class="text">Welcome to AI Travel Planner! Fill out the form above and click "Plan My Trip" to get started.</span>
+                </div>
+            </div>
+            <div class="terminal-actions">
+                <button id="copyItineraryBtn" class="save-btn" disabled>
+                    📋 Copy Itinerary to Clipboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="netlify-api-fix.js"></script>
+    <script src="visitor-tracker.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

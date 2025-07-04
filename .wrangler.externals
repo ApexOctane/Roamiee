@@ -1,0 +1,3 @@
+{
+  "externals": ["path-to-regexp"]
+}

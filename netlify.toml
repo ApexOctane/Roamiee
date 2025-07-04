@@ -1,0 +1,21 @@
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+[functions]
+  directory = "functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["firebase-admin"]
+
+# Define redirects for API endpoints
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/*"
+  status = 200
+
+# Only redirect if file doesn't exist (SPA fallback)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false

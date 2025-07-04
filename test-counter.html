@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Usage Counter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .counter {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Usage Counter Test</h1>
+    <div class="counter">
+        Used <span id="usageCount">0</span> times
+    </div>
+    <br>
+    <button onclick="incrementCounter()">Increment Counter</button>
+    <button onclick="loadCounter()">Load Counter</button>
+    <button onclick="resetCounter()">Reset Counter</button>
+    
+    <div id="log" style="margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+        <h3>Log:</h3>
+        <div id="logContent"></div>
+    </div>
+
+    <script>
+        let usageCount = 0;
+
+        function log(message) {
+            const logContent = document.getElementById('logContent');
+            logContent.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+        }
+
+        async function loadCounter() {
+            try {
+                log('Loading counter from server...');
+                const response = await fetch('/api/usage-stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    usageCount = data.usageCount || 0;
+                    log('Loaded from server: ' + usageCount);
+                } else {
+                    throw new Error('Server not available');
+                }
+            } catch (error) {
+                log('Server failed, using localStorage: ' + error.message);
+                const stored = localStorage.getItem('travelPlannerUsageCount');
+                usageCount = stored ? parseInt(stored) : 0;
+                log('Loaded from localStorage: ' + usageCount);
+            }
+            updateDisplay();
+        }
+
+        async function saveCounter() {
+            try {
+                log('Saving counter to server: ' + usageCount);
+                const response = await fetch('/api/usage-stats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        usageCount: usageCount,
+                        lastUpdated: new Date().toISOString()
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Server save failed');
+                }
+                log('Successfully saved to server');
+            } catch (error) {
+                log('Server save failed, using localStorage: ' + error.message);
+                localStorage.setItem('travelPlannerUsageCount', usageCount.toString());
+                log('Saved to localStorage: ' + usageCount);
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('usageCount').textContent = usageCount;
+            log('Display updated to: ' + usageCount);
+        }
+
+        async function incrementCounter() {
+            log('Incrementing counter from ' + usageCount + ' to ' + (usageCount + 1));
+            usageCount++;
+            updateDisplay();
+            await saveCounter();
+        }
+
+        function resetCounter() {
+            usageCount = 0;
+            updateDisplay();
+            localStorage.removeItem('travelPlannerUsageCount');
+            log('Counter reset to 0');
+        }
+
+        // Load counter on page load
+        window.addEventListener('load', loadCounter);
+    </script>
+</body>
+</html>
